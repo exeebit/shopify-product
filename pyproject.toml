@@ -1,7 +1,7 @@
 [project]
-name = "birth_teller"
-version = "0.2.0"
-description = "A Python package to calculate birthdays and zodiac info"
+name = "shopify-products"
+version = "0.1.0"
+description = "A sophisticated package for Shopify products"
 authors = [
   { name = "Emran Hossain Sagor", email = "imrans4gor@gmail.com" }
 ]
@@ -23,7 +23,6 @@ classifiers = [
 keywords = [
 	"birthday",
 	"day",
-	"birthday",
 	"week day",
 ]
 
@@ -33,4 +32,16 @@ Issues = "https://github.com/exeebit/birth-teller/issues"
 Changelog = "https://github.com/exeebit/birth-teller/blob/main/CHANGELOG.md"
 
 [project.scripts]
-birth-teller = "birth_teller.cli:main"
+shopify-product = "shopify_product.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "black",
+    "isort",
+    "pytest",
+    "pytest-cov",
+    "build",
+    "twine",
+    "mypy"
+]
