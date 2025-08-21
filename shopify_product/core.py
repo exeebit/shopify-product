@@ -11,7 +11,7 @@ class shopifyProduct:
     def __init__(self, url: str):
         self.url = url
         try:
-            agent = {
+            self.agent = {
                 "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -21,13 +21,16 @@ class shopifyProduct:
                 "Accept-Language": "en-US,en;q=0.9",
                  "Connection": "keep-alive",
             }
-            req = Request(self.url, method="HEAD", headers=agent)
+            req = Request(self.url, method="HEAD", headers=self.agent)
             with urlopen(req, timeout=30) as response:
                 headers = dict(response.headers)
-                if headers.get("x-shopid") and headers.get("x-sorting-hat-shopid"):
-                else:
-                    print("Not Shopify")
+                if not headers.get("x-shopid") and not headers.get("x-sorting-hat-shopid"):
+                    print("Site is not Shopify")
                     sys.exit(1)
         except (HTTPError, URLError):
             print("Site is not reachable")
             sys.exit(1)
+
+    def total_products(self):
+        url = f"{self.url}/?limit=250"
+        req = Request(url, method="HEAD", headers=self.agent)
