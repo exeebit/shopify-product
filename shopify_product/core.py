@@ -1,36 +1,50 @@
 #!/usr/bin/python3
-import json
 import sys
-import time
+import json
+import socket
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
+from .config import DEFAULT_HEADERS, REQUEST_TIMEOUT, DEFAULT_PRODUCT_LIMIT
 
 
 class shopifyProduct:
     """A package for Shopify products"""
-    def __init__(self, url: str):
+    def __init__(self, url:str=None, agent=None):
         self.url = url
+        self.agent = agent or DEFAULT_HEADERS
+
+    def check_status(self):
         try:
-            self.agent = {
-                "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/116.0.0.0 Safari/537.36"
-                ),
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.9",
-                 "Connection": "keep-alive",
-            }
             req = Request(self.url, method="HEAD", headers=self.agent)
-            with urlopen(req, timeout=30) as response:
+            with urlopen(req, timeout=REQUEST_TIMEOUT) as response:
                 headers = dict(response.headers)
-                if not headers.get("x-shopid") and not headers.get("x-sorting-hat-shopid"):
+                if headers.get("x-shopid") and headers.get("x-sorting-hat-shopid"):
+                    return True
+                else:
                     print("Site is not Shopify")
-                    sys.exit(1)
-        except (HTTPError, URLError):
-            print("Site is not reachable")
-            sys.exit(1)
+                    return False
+        except HTTPError as e:
+            print(f"HTTP Error: {e.code} - {e.reason}")
+            return False
+        except URLError as e:
+            if isinstance(e.reason, socket.timeout):
+                print("Request timed out!")
+                return False
+            else:
+                print(f"Failed to reach server: {e.reason}")
+                return False
+        except socket.timeout:
+            print("Request timed out!")
+            return False
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return False
 
     def total_products(self):
-        url = f"{self.url}/?limit=250"
-        req = Request(url, method="HEAD", headers=self.agent)
+        url = f"{self.url}/products.json?limit=250"
+        req = Request(url, headers=self.agent)
+        with urlopen(req, timeout=30) as response:
+            content = response.read()
+            text = content.decode('utf-8')
+            d = json.loads(text)['products']
+
