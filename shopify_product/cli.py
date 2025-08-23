@@ -1,4 +1,6 @@
 # cli.py
+import sys
+import re
 from .core import shopifyProduct
 
 def normalize_url(url: str) -> str:
@@ -14,6 +16,9 @@ def main():
     active = True
     while active:
         url_base = input("Enter Shopify store URL (e.g., https://shopifystore.com): ").strip()
+        if url_base == "exit":
+            print("Goodbye")
+            sys.exit(1)
         url = normalize_url(url_base)
         sp = shopifyProduct(url)
         if(sp.check_status()):
@@ -22,7 +27,7 @@ def main():
 
     # Interactive shell
     while True:
-        cmd = input(f"{url_base}> ").strip()
+        cmd = input(f"{re.sub(r'https://', '', url_base)}> ").strip()
         if not cmd:
             continue
 
@@ -39,6 +44,8 @@ def main():
             print("  exit                        - Quit CLI\n")
         elif command == "fetch":
             sp.total_products()
+        elif command == "total-collection":
+            sp.total_collections()
         elif command == "titles":
             titles = sp.get_titles()
             if not titles:

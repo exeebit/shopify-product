@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-import sys
 import json
+import sys
 import socket
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -40,11 +40,30 @@ class shopifyProduct:
             print(f"Unexpected error: {e}")
             return False
 
-    def total_products(self):
-        url = f"{self.url}/products.json?limit=250"
-        req = Request(url, headers=self.agent)
-        with urlopen(req, timeout=30) as response:
-            content = response.read()
-            text = content.decode('utf-8')
-            d = json.loads(text)['products']
+    # def total_products(self):
+    #     url = f"{self.url}/products.json?limit=250"
+    #     req = Request(url, headers=self.agent)
+    #     with urlopen(req, timeout=30) as response:
+    #         content = response.read()
+    #         text = content.decode('utf-8')
+    #         d = json.loads(text)['products']
+
+    def total_collections(self):
+        counter = 1
+        t_collection = 0;
+        while True:
+            url = f"{self.url}/collections.json?limit={DEFAULT_PRODUCT_LIMIT}&page={counter}"
+            req = Request(url, headers=self.agent)
+            with urlopen(req, timeout=REQUEST_TIMEOUT) as response:
+                content = response.read()
+                text = content.decode('utf-8')
+                d = json.loads(text)['collections']
+                for i in d:
+                    print(i.get('title'))
+                if len(d) != 0:
+                    t_collection += len(d)
+                    counter += 1
+                else:
+                    break
+        print(t_collection)
 
